@@ -58,7 +58,12 @@ jobs:
 
       - name: Build Docker image
         run: |
+          GIT_COMMIT=$(git rev-parse --short HEAD)
+          echo "Git commit: $GIT_COMMIT"
+
           docker build \
+            --build-arg APP_VERSION=${{ steps.version.outputs.version }} \
+            --build-arg GIT_COMMIT=$GIT_COMMIT \
             -t ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }} \
             -t ghcr.io/${{ github.repository }}:latest \
             .
