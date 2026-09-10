@@ -8,6 +8,9 @@ def test_health():
     assert response.status_code == 200
     data = response.get_json()
     assert data["status"] == "healthy"
+    assert "application_version" in data
+    assert "model_version" in data
+    assert "git_commit" in data
 
 
 def test_prediction():
