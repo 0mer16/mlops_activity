@@ -1,8 +1,14 @@
+import os
+
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-MODEL_VERSION = "1.1"
+# these get set when the docker image is built in the CD pipeline
+APP_VERSION = os.getenv("APP_VERSION", "dev")
+GIT_COMMIT = os.getenv("GIT_COMMIT", "unknown")
+
+MODEL_VERSION = "model-6"
 
 
 @app.route("/")
@@ -16,8 +22,10 @@ def home():
 @app.route("/health")
 def health():
     return jsonify({
-        "status": "healthy",
-        "model_version": MODEL_VERSION
+        "application_version": APP_VERSION,
+        "model_version": MODEL_VERSION,
+        "git_commit": GIT_COMMIT,
+        "status": "healthy"
     })
 
 
