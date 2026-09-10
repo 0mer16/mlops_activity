@@ -96,3 +96,10 @@ jobs:
             --restart unless-stopped \
             -p 5000:5000 \
             ghcr.io/${{ github.repository }}:${{ needs.build.outputs.version }}
+
+      - name: Verify staging deployment
+        run: |
+          sleep 5
+
+          curl --fail --retry 5 --retry-delay 2 --retry-connrefused \
+            http://localhost:5000/health
