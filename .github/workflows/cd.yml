@@ -103,11 +103,17 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ needs.build.outputs.version }}
 
       - name: Verify staging deployment
+        env:
+          EXPECTED_VERSION: ${{ needs.build.outputs.version }}
         run: |
           sleep 5
 
-          curl --fail --retry 5 --retry-delay 2 --retry-connrefused \
-            http://localhost:5000/health
+          RESPONSE=$(curl --fail --retry 5 --retry-delay 2 --retry-connrefused \
+            http://localhost:5000/health)
+          echo "$RESPONSE"
+
+          # make sure staging is really running the version we just built
+          echo "$RESPONSE" | python3 -c "import sys, json, os; d = json.load(sys.stdin); assert d['status'] == 'healthy'; assert d['application_version'] == os.environ['EXPECTED_VERSION'], d"
 
   deploy-production:
     needs:
@@ -142,8 +148,13 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ needs.build.outputs.version }}
 
       - name: Verify production deployment
+        env:
+          EXPECTED_VERSION: ${{ needs.build.outputs.version }}
         run: |
           sleep 5
 
-          curl --fail --retry 5 --retry-delay 2 --retry-connrefused \
-            http://localhost:5000/health
+          RESPONSE=$(curl --fail --retry 5 --retry-delay 2 --retry-connrefused \
+            http://localhost:5000/health)
+          echo "$RESPONSE"
+
+          echo "$RESPONSE" | python3 -c "import sys, json, os; d = json.load(sys.stdin); assert d['status'] == 'healthy'; assert d['application_version'] == os.environ['EXPECTED_VERSION'], d"
